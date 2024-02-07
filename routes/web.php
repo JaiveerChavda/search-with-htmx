@@ -25,4 +25,28 @@ Route::get('/dashboard', function () {
 
 Route::resource('articles',ArticleController::class)->middleware(['auth'])->only('index');
 
+/*
+|--------------------------------------------------------------------------
+| Htmx get request (search) method
+|--------------------------------------------------------------------------
+| As htmx request only accepts response which should be parsed by browser
+|  so eloquent and collection  object cannot be returned directly,
+| we need to convert it into html parsable
+| format using blade template engine.
+|this method returns a view page which contain our search results.
+|
+|
+*/
+
+Route::get('/search', function (){
+
+    if (!is_null(request('search'))) {
+        $results = Article::query()->where('title','LIKE', '%'. request('search') . '%')->paginate(3);
+        return view('search-results',['articles' => $results]);
+    }
+
+    $results = Article::query()->paginate(3);
+    return view('search-results',['articles' => $results]);
+});
+
 require __DIR__.'/auth.php';
